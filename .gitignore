@@ -2,3 +2,4 @@
 venv
 **__pychache
 db.sqlite3
+media/
