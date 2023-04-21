@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from rest_framework.generics import get_object_or_404
 
 from user.models import Profile
 
@@ -30,3 +31,28 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ["id", "user", "photo", "bio"]
+
+
+class ProfileListSerializer(ProfileSerializer):
+    username = serializers.CharField(
+        source="user.username",
+        read_only=True
+    )
+
+    class Meta(ProfileSerializer.Meta):
+        fields = ["id", "username", "photo", "bio"]
+
+
+class ProfileDetailSerializer(ProfileSerializer):
+    username = serializers.CharField(source="user.username")
+
+    class Meta(ProfileSerializer.Meta):
+        fields = ["id", "username", "photo", "bio"]
+
+    def update(self, instance, validated_data):
+        instance.user.username = validated_data.get("user").get("username", instance.user.username)
+        instance.user.save()
+        instance.bio = validated_data.get("bio", instance.bio)
+        instance.photo = validated_data.get("bio", instance.photo)
+        instance.save()
+        return instance

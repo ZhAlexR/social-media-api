@@ -1,15 +1,22 @@
 from rest_framework import generics
-from rest_framework.viewsets import ModelViewSet
+from rest_framework import viewsets
 
 from user.models import Profile
-from user.serializers import ProfileSerializer, UserSerializer
+from user.serializers import (
+    ProfileListSerializer,
+    UserSerializer,
+    ProfileDetailSerializer
+)
 
 
 class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
 
 
-class ProfileViewSet(ModelViewSet):
+class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
 
+    def get_serializer_class(self):
+        if self.action == "list":
+            return ProfileListSerializer
+        return ProfileDetailSerializer
