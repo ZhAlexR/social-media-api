@@ -36,7 +36,8 @@ class Migration(migrations.Migration):
             model_name="like",
             name="post",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="social_network.post"
+                on_delete=django.db.models.deletion.CASCADE,
+                to="social_network.post",
             ),
         ),
         migrations.AddField(
@@ -61,7 +62,8 @@ class Migration(migrations.Migration):
             model_name="comment",
             name="post",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="social_network.post"
+                on_delete=django.db.models.deletion.CASCADE,
+                to="social_network.post",
             ),
         ),
     ]

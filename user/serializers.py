@@ -35,10 +35,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class ProfileListSerializer(ProfileSerializer):
-    username = serializers.CharField(
-        source="user.username",
-        read_only=True
-    )
+    username = serializers.CharField(source="user.username", read_only=True)
 
     class Meta(ProfileSerializer.Meta):
         fields = ["id", "username", "photo", "bio"]
@@ -50,19 +47,18 @@ class ProfileDetailSerializer(ProfileSerializer):
     last_name = serializers.CharField(source="user.last_name")
 
     class Meta(ProfileSerializer.Meta):
-        fields = [
-            "id",
-            "username",
-            "first_name",
-            "last_name",
-            "photo",
-            "bio"
-        ]
+        fields = ["id", "username", "first_name", "last_name", "photo", "bio"]
 
     def update(self, instance, validated_data):
-        instance.user.username = validated_data.get("user").get("username", instance.user.username)
-        instance.user.first_name = validated_data.get("user").get("first_name", instance.user.username)
-        instance.user.last_name = validated_data.get("user").get("last_name", instance.user.username)
+        instance.user.username = validated_data.get("user").get(
+            "username", instance.user.username
+        )
+        instance.user.first_name = validated_data.get("user").get(
+            "first_name", instance.user.username
+        )
+        instance.user.last_name = validated_data.get("user").get(
+            "last_name", instance.user.username
+        )
         instance.user.save()
 
         instance.bio = validated_data.get("bio", instance.bio)

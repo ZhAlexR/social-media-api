@@ -6,7 +6,7 @@ from user.models import Profile
 from user.serializers import (
     ProfileListSerializer,
     UserSerializer,
-    ProfileDetailSerializer
+    ProfileDetailSerializer,
 )
 
 
@@ -22,11 +22,21 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
 
 class ProfileViewSet(
-    generics.ListAPIView,
-    generics.RetrieveAPIView,
-    viewsets.GenericViewSet
+    generics.ListAPIView, generics.RetrieveAPIView, viewsets.GenericViewSet
 ):
-    queryset = Profile.objects.all()
+    def get_queryset(self):
+        queryset = Profile.objects.all()
+
+        username = self.request.query_params.get("username")
+        bio = self.request.query_params.get("bio")
+
+        if username:
+            queryset = queryset.filter(user__username__icontains=username)
+
+        if bio:
+            queryset = queryset.filter(bio__icontains=bio)
+
+        return queryset
 
     def get_serializer_class(self):
         if self.action == "list":

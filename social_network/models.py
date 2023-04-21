@@ -15,7 +15,7 @@ class Post(models.Model):
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="posts"
+        related_name="posts",
     )
 
     def __str__(self) -> str:
@@ -28,7 +28,7 @@ class Comment(models.Model):
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="comments"
+        related_name="comments",
     )
 
     def __str__(self) -> str:
@@ -40,7 +40,7 @@ class Like(models.Model):
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="likes"
+        related_name="likes",
     )
 
 
@@ -61,7 +61,5 @@ def create_image_path(instance, filename: str) -> str:
 class Image(models.Model):
     image = models.ImageField(upload_to=create_image_path)
     post = models.ForeignKey(
-        Post,
-        on_delete=models.CASCADE,
-        related_name="images"
+        Post, on_delete=models.CASCADE, related_name="images"
     )

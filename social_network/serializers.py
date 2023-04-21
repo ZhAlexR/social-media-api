@@ -4,7 +4,6 @@ from social_network.models import Post
 
 
 class PostSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Post
         fields = ["title", "text", "created_at", "updated_at", "owner"]
