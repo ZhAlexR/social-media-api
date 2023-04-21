@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework import viewsets
 
@@ -13,7 +14,18 @@ class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
 
 
-class ProfileViewSet(viewsets.ModelViewSet):
+class UserProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = ProfileDetailSerializer
+
+    def get_object(self):
+        return self.request.user.profile
+
+
+class ProfileViewSet(
+    generics.ListAPIView,
+    generics.RetrieveAPIView,
+    viewsets.GenericViewSet
+):
     queryset = Profile.objects.all()
 
     def get_serializer_class(self):
