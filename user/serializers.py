@@ -9,6 +9,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ["id", "username", "email", "password", "is_staff"]
+        read_only_fields = ["is_staff"]
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
@@ -45,14 +46,26 @@ class ProfileListSerializer(ProfileSerializer):
 
 class ProfileDetailSerializer(ProfileSerializer):
     username = serializers.CharField(source="user.username")
+    first_name = serializers.CharField(source="user.first_name")
+    last_name = serializers.CharField(source="user.last_name")
 
     class Meta(ProfileSerializer.Meta):
-        fields = ["id", "username", "photo", "bio"]
+        fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "photo",
+            "bio"
+        ]
 
     def update(self, instance, validated_data):
         instance.user.username = validated_data.get("user").get("username", instance.user.username)
+        instance.user.first_name = validated_data.get("user").get("first_name", instance.user.username)
+        instance.user.last_name = validated_data.get("user").get("last_name", instance.user.username)
         instance.user.save()
+
         instance.bio = validated_data.get("bio", instance.bio)
-        instance.photo = validated_data.get("bio", instance.photo)
+        instance.photo = validated_data.get("photo", instance.photo)
         instance.save()
         return instance
