@@ -54,7 +54,7 @@ class Tag(models.Model):
 
 def create_image_path(instance, filename: str) -> str:
     _, extension = os.path.splitext(filename)
-    filename = f"{slugify(instance.user.username)}-{uuid.uuid4()}{extension}"
+    filename = f"{slugify(instance.pk)}-{uuid.uuid4()}{extension}"
     return os.path.join(f"posts/post{instance.pk}", filename)
 
 
