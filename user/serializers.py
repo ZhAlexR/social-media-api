@@ -47,7 +47,14 @@ class ProfileDetailSerializer(ProfileSerializer):
     last_name = serializers.CharField(source="user.last_name")
 
     class Meta(ProfileSerializer.Meta):
-        fields = ["id", "username", "first_name", "last_name", "photo", "bio"]
+        fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "photo",
+            "bio",
+        ]
 
     def update(self, instance, validated_data):
         instance.user.username = validated_data.get("user").get(
