@@ -18,7 +18,7 @@ class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
 
 
-class UserProfileView(generics.RetrieveUpdateAPIView):
+class UserProfileView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProfileDetailSerializer
 
     def get_object(self):
