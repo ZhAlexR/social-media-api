@@ -15,11 +15,20 @@ class PostViewSet(
     queryset = Post.objects.all()
     permission_classes = [IsOwnerOrReadOnly]
 
+    @staticmethod
+    def _params_to_digit_list(params: str) -> list[int]:
+        return [int(param) for param in params.split(",")]
+
     def get_queryset(self):
         queryset = Post.objects.filter(
             Q(owner=self.request.user)
             | Q(owner__in=self.request.user.following.all())
         )
+
+        tags = self.request.query_params.get("tags")
+        if tags:
+            queryset = queryset.filter(tags__in=self._params_to_digit_list(tags)).distinct()
+
         return queryset
 
     def get_serializer_class(self):
