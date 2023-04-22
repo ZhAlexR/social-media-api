@@ -1,6 +1,10 @@
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework import viewsets
+from rest_framework.decorators import action, api_view
+from rest_framework.request import Request
+from rest_framework.response import Response
 
 from user.models import Profile
 from user.serializers import (
@@ -22,7 +26,9 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
 
 class ProfileViewSet(
-    generics.ListAPIView, generics.RetrieveAPIView, viewsets.GenericViewSet
+    generics.ListAPIView,
+    generics.RetrieveAPIView,
+    viewsets.GenericViewSet
 ):
     def get_queryset(self):
         queryset = Profile.objects.all()
@@ -42,3 +48,15 @@ class ProfileViewSet(
         if self.action == "list":
             return ProfileListSerializer
         return ProfileDetailSerializer
+
+
+@api_view(["GET"])
+def toggle_follow(request: Request, pk: int) -> Response:
+    current_user = request.user
+    toggle_follow_user = get_object_or_404(get_user_model(), pk=pk)
+
+    if current_user in toggle_follow_user.followers.all():
+        toggle_follow_user.followers.remove(current_user)
+    else:
+        toggle_follow_user.followers.add(current_user)
+    return Response(status=status.HTTP_200_OK)
