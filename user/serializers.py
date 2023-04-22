@@ -45,6 +45,8 @@ class ProfileDetailSerializer(ProfileSerializer):
     username = serializers.CharField(source="user.username")
     first_name = serializers.CharField(source="user.first_name")
     last_name = serializers.CharField(source="user.last_name")
+    followers = serializers.SerializerMethodField()
+    following = serializers.SerializerMethodField()
 
     class Meta(ProfileSerializer.Meta):
         fields = [
@@ -54,7 +56,17 @@ class ProfileDetailSerializer(ProfileSerializer):
             "last_name",
             "photo",
             "bio",
+            "followers",
+            "following",
         ]
+
+    def get_followers(self, obj):
+        followers = obj.user.followers.all()
+        return UserSerializer(followers, many=True).data
+
+    def get_following(self, obj):
+        following = obj.user.following.all()
+        return UserSerializer(following, many=True).data
 
     def update(self, instance, validated_data):
         instance.user.username = validated_data.get("user").get(
