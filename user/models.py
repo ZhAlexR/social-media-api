@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models import QuerySet
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
@@ -44,6 +45,11 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
+    following = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        related_name="followers",
+    )
     email = models.EmailField(_("email address"), unique=True)
 
     USERNAME_FIELD = "email"
