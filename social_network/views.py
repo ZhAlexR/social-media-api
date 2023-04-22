@@ -1,6 +1,7 @@
 from django.db.models import Q
 from rest_framework import viewsets, status, generics
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -13,17 +14,20 @@ class PostViewSet(
     viewsets.ModelViewSet
 ):
     queryset = Post.objects.all()
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     @staticmethod
     def _params_to_digit_list(params: str) -> list[int]:
         return [int(param) for param in params.split(",")]
 
     def get_queryset(self):
-        queryset = Post.objects.filter(
-            Q(owner=self.request.user)
-            | Q(owner__in=self.request.user.following.all())
-        )
+        queryset = Post.objects.all()
+
+        if self.request.user.is_authenticated:
+            queryset = Post.objects.filter(
+                Q(owner=self.request.user)
+                | Q(owner__in=self.request.user.following.all())
+            )
 
         tags = self.request.query_params.get("tags")
         if tags:
@@ -57,4 +61,4 @@ class PostViewSet(
 class CreateTagView(generics.CreateAPIView):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-
+    permission_classes = [IsAuthenticated]
