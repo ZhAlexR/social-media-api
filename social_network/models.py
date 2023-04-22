@@ -53,13 +53,18 @@ class Tag(models.Model):
 
 
 def create_image_path(instance, filename: str) -> str:
-    _, extension = os.path.splitext(filename)
-    filename = f"{slugify(instance.pk)}-{uuid.uuid4()}{extension}"
-    return os.path.join(f"posts/post{instance.pk}", filename)
+    name, extension = os.path.splitext(filename)
+    filename = f"{slugify(name)}-{uuid.uuid4()}{extension}"
+    return os.path.join(f"posts/post{instance.post_id}", filename)
 
 
 class Image(models.Model):
     image = models.ImageField(upload_to=create_image_path)
     post = models.ForeignKey(
         Post, on_delete=models.CASCADE, related_name="images"
+    )
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="images"
     )
