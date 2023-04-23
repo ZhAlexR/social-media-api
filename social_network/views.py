@@ -24,6 +24,8 @@ class PostViewSet(
 
     def get_queryset(self):
         queryset = Post.objects.all()
+        tags = self.request.query_params.get("tags")
+        reaction = self.request.query_params.get("reaction")
 
         if self.request.user.is_authenticated:
             queryset = Post.objects.filter(
@@ -31,10 +33,11 @@ class PostViewSet(
                 | Q(owner__in=self.request.user.following.all())
             )
 
-        tags = self.request.query_params.get("tags")
         if tags:
             queryset = queryset.filter(tags__in=self._params_to_digit_list(tags)).distinct()
 
+        if reaction:
+            queryset = queryset.filter(reactions=reaction)
         return queryset
 
     def get_serializer_class(self):
