@@ -22,8 +22,30 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class PostSerializer(serializers.ModelSerializer):
+    reactions = serializers.SerializerMethodField(method_name="reaction_counts")
 
     class Meta:
         model = Post
-        fields = ["id", "title", "tags", "text", "created_at", "updated_at", "owner"]
-        read_only_fields = ["id", "tags", "created_at", "updated_ad", "owner"]
+        fields = [
+            "id",
+            "title",
+            "tags",
+            "text",
+            "created_at",
+            "updated_at",
+            "owner",
+            "reactions"
+        ]
+        read_only_fields = [
+            "id",
+            "tags",
+            "created_at",
+            "updated_ad",
+            "owner",
+            "reactions"
+        ]
+
+    def reaction_counts(self, obj) -> dict:
+        likes_count = obj.reactions.filter(reaction='LIKE').count()
+        dislikes_count = obj.reactions.filter(reaction='DIS').count()
+        return {"likes": likes_count, "dislikes": dislikes_count}
