@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Q
-from rest_framework import viewsets, status, generics
+from django.db.models import Q, QuerySet
+from rest_framework import viewsets, status, generics, serializers
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import (
@@ -10,13 +10,15 @@ from rest_framework.permissions import (
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from social_network.models import Post, Tag, Reaction
+from social_network.models import Post, Tag, Reaction, Comment
 from social_network.permissions import IsOwnerOrReadOnly
 from social_network.serializers import (
     PostSerializer,
     ImageSerializer,
     TagSerializer,
     PostDetailSerializer,
+    CommentSerializer,
+    CommentDetailSerializer,
 )
 
 
@@ -55,6 +57,9 @@ class PostViewSet(viewsets.ModelViewSet):
         if self.action == "upload_image":
             return ImageSerializer
 
+        if self.action == "comment":
+            return CommentSerializer
+
         return PostSerializer
 
     @action(methods=["POST"], detail=True, url_path="upload-image")
@@ -80,6 +85,20 @@ class CreateTagView(generics.CreateAPIView):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = [IsAuthenticated]
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+
+    def get_queryset(self) -> QuerySet:
+        query = Comment.objects.filter(owner=self.request.user)
+        return query
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return CommentDetailSerializer
+        return CommentSerializer
 
 
 @api_view(["GET"])

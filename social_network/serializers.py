@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from social_network.models import Post, Image, Tag, Comment
 
@@ -21,14 +22,28 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    owner = serializers.SlugRelatedField(slug_field="username", read_only=True)
+
     class Meta:
         model = Comment
         fields = [
+            "id",
+            "post",
             "text",
             "owner",
             "created_at",
             "updated_at",
         ]
+
+        read_only_fields = [
+            "created_at",
+            "updated_at",
+        ]
+
+
+class CommentDetailSerializer(CommentSerializer):
+    class Meta(CommentSerializer.Meta):
+        read_only_fields = CommentSerializer.Meta.read_only_fields.append("post")
 
 
 class PostSerializer(serializers.ModelSerializer):
