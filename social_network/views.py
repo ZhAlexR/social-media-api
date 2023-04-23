@@ -3,18 +3,24 @@ from django.db.models import Q
 from rest_framework import viewsets, status, generics
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from social_network.models import Post, Tag, Reaction
 from social_network.permissions import IsOwnerOrReadOnly
-from social_network.serializers import PostSerializer, ImageSerializer, TagSerializer
+from social_network.serializers import (
+    PostSerializer,
+    ImageSerializer,
+    TagSerializer,
+    PostDetailSerializer,
+)
 
 
-class PostViewSet(
-    viewsets.ModelViewSet
-):
+class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
@@ -34,13 +40,18 @@ class PostViewSet(
             )
 
         if tags:
-            queryset = queryset.filter(tags__in=self._params_to_digit_list(tags)).distinct()
+            queryset = queryset.filter(
+                tags__in=self._params_to_digit_list(tags)
+            ).distinct()
 
         if reaction:
             queryset = queryset.filter(reactions=reaction)
         return queryset
 
     def get_serializer_class(self):
+        if self.action in ["retrieve", "update"]:
+            return PostDetailSerializer
+
         if self.action == "upload_image":
             return ImageSerializer
 
@@ -49,7 +60,9 @@ class PostViewSet(
     @action(methods=["POST"], detail=True, url_path="upload-image")
     def upload_image(self, request: Request, pk: int = None) -> Response:
         post = self.get_object()
-        serializer = self.get_serializer(data=request.data, context={"post": post})
+        serializer = self.get_serializer(
+            data=request.data, context={"post": post}
+        )
 
         if serializer.is_valid():
             serializer.save()
@@ -82,7 +95,9 @@ def toggle_like(request: Request, pk: int) -> Response:
             reaction.save()
             return Response({"status": "liked"}, status=status.HTTP_200_OK)
         reaction.delete()
-        return Response({"status": "reaction is deleted"}, status=status.HTTP_200_OK)
+        return Response(
+            {"status": "reaction is deleted"}, status=status.HTTP_200_OK
+        )
     except Reaction.DoesNotExist:
         reaction = Reaction(post=post, owner=current_user, reaction="LIKE")
         reaction.save()
@@ -102,7 +117,9 @@ def toggle_dislike(request: Request, pk: int) -> Response:
             reaction.save()
             return Response({"status": "disliked"}, status=status.HTTP_200_OK)
         reaction.delete()
-        return Response({"status": "reaction is deleted"}, status=status.HTTP_200_OK)
+        return Response(
+            {"status": "reaction is deleted"}, status=status.HTTP_200_OK
+        )
     except Reaction.DoesNotExist:
         reaction = Reaction(post=post, owner=current_user, reaction="DIS")
         reaction.save()

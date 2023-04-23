@@ -24,19 +24,25 @@ class Post(models.Model):
 
 class Comment(models.Model):
     text = models.CharField(max_length=255)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE
+    )
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="comments",
     )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        default_related_name = "comments"
 
     def __str__(self) -> str:
         return f"{self.text[:10]} by {self.owner.username}"
 
 
 class Reaction(models.Model):
-
     REACTION_CHOICES = [
         ("DIS", "dislike"),
         ("LIKE", "like")
