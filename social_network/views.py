@@ -1,11 +1,13 @@
+from django.contrib.auth import get_user_model
 from django.db.models import Q
 from rest_framework import viewsets, status, generics
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from social_network.models import Post, Tag
+from social_network.models import Post, Tag, Reaction
 from social_network.permissions import IsOwnerOrReadOnly
 from social_network.serializers import PostSerializer, ImageSerializer, TagSerializer
 
@@ -62,3 +64,41 @@ class CreateTagView(generics.CreateAPIView):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = [IsAuthenticated]
+
+
+@api_view(["GET"])
+def toggle_like(request: Request, pk: int) -> Response:
+    current_user = request.user
+    post = get_object_or_404(Post, pk=pk)
+
+    try:
+        reaction = Reaction.objects.get(post=post, owner=current_user)
+        if reaction.reaction == "DIS":
+            reaction.reaction = "LIKE"
+            reaction.save()
+            return Response({"status": "liked"}, status=status.HTTP_200_OK)
+        reaction.delete()
+        return Response({"status": "reaction is deleted"}, status=status.HTTP_200_OK)
+    except Reaction.DoesNotExist:
+        reaction = Reaction(post=post, owner=current_user, reaction="LIKE")
+        reaction.save()
+        return Response({"status": "liked"}, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+def toggle_dislike(request: Request, pk: int) -> Response:
+    current_user = request.user
+    post = get_object_or_404(Post, pk=pk)
+
+    try:
+        reaction = Reaction.objects.get(post=post, owner=current_user)
+        if reaction.reaction == "LIKE":
+            reaction.reaction = "DIS"
+            reaction.save()
+            return Response({"status": "disliked"}, status=status.HTTP_200_OK)
+        reaction.delete()
+        return Response({"status": "reaction is deleted"}, status=status.HTTP_200_OK)
+    except Reaction.DoesNotExist:
+        reaction = Reaction(post=post, owner=current_user, reaction="DIS")
+        reaction.save()
+        return Response({"status": "disliked"}, status=status.HTTP_200_OK)
