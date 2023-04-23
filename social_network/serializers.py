@@ -43,7 +43,20 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class CommentDetailSerializer(CommentSerializer):
     class Meta(CommentSerializer.Meta):
-        read_only_fields = CommentSerializer.Meta.read_only_fields.append("post")
+        read_only_fields = CommentSerializer.Meta.read_only_fields.append(
+            "post"
+        )
+
+
+class CommentPostDetailSerializer(CommentSerializer):
+    class Meta(CommentSerializer.Meta):
+        fields = [
+            "id",
+            "text",
+            "owner",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -93,7 +106,7 @@ class PostSerializer(serializers.ModelSerializer):
 
 
 class PostDetailSerializer(PostSerializer):
-    comments = CommentSerializer(many=True, read_only=True)
+    comments = CommentPostDetailSerializer(many=True, read_only=True)
 
     class Meta(PostSerializer.Meta):
         fields = [
