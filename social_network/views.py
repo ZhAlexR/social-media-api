@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from rest_framework import viewsets, status, generics
-from rest_framework.decorators import action, api_view
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.request import Request
@@ -67,6 +67,7 @@ class CreateTagView(generics.CreateAPIView):
 
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def toggle_like(request: Request, pk: int) -> Response:
     current_user = request.user
     post = get_object_or_404(Post, pk=pk)
@@ -86,6 +87,7 @@ def toggle_like(request: Request, pk: int) -> Response:
 
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def toggle_dislike(request: Request, pk: int) -> Response:
     current_user = request.user
     post = get_object_or_404(Post, pk=pk)
