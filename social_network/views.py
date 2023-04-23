@@ -77,7 +77,81 @@ class PostViewSet(viewsets.ModelViewSet):
         ]
     )
     def list(self, request, *args, **kwargs):
+        """
+        List all posts or filter by tags and reactions.
+
+        Parameters:
+        - `tag` (list[int]): Filter posts by tag ids (comma separated).
+        - `reaction` (int): Filter posts by user reaction id.
+
+        Example responses:
+        - 200 OK: List of posts with applied filters.
+        """
         return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        request=PostSerializer,
+        responses={
+            200: PostDetailSerializer,
+            400: "Bad Request",
+            401: "Unauthorized",
+        },
+    )
+    def create(self, request, *args, **kwargs):
+        """
+        Create a new post.
+
+        Example responses:
+        - 200 OK: Detailed representation of created post.
+        - 400 Bad Request: Invalid data provided in the request.
+        - 401 Unauthorized: User is not authenticated.
+        """
+        return super().create(request, *args, **kwargs)
+
+    @extend_schema(
+        request=PostSerializer,
+        responses={
+            200: PostDetailSerializer,
+            400: "Bad Request",
+            401: "Unauthorized",
+            403: "Forbidden",
+            404: "Not Found",
+        },
+    )
+    def update(self, request, *args, **kwargs):
+        """
+        Update a post by ID.
+
+        Example responses:
+        - 200 OK: Detailed representation of updated post.
+        - 400 Bad Request: Invalid data provided in the request.
+        - 401 Unauthorized: User is not authenticated.
+        - 403 Forbidden: User does not have permission to update this post.
+        - 404 Not Found: Post with specified ID does not exist.
+        """
+        return super().update(request, *args, **kwargs)
+
+    @extend_schema(
+        request=PostSerializer,
+        responses={
+            200: PostDetailSerializer,
+            400: "Bad Request",
+            401: "Unauthorized",
+            403: "Forbidden",
+            404: "Not Found",
+        },
+    )
+    def destroy(self, request, *args, **kwargs):
+        """
+        Destroy the post with the specified ID.
+
+        Example responses:
+        - 204 No Content: Post successfully deleted.
+        - 401 Unauthorized: User is not authenticated.
+        - 403 Forbidden: User does not have permission to delete this post.
+        - 404 Not Found: Post with specified ID does not exist.
+        """
+        return super().destroy(request, *args, **kwargs)
 
     def get_serializer_class(self):
         if self.action in ["retrieve", "update"]:
