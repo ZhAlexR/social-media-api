@@ -1,6 +1,10 @@
-from django.contrib.auth import get_user_model
 from django.db.models import Q, QuerySet
-from rest_framework import viewsets, status, generics, serializers
+from drf_spectacular.utils import (
+    extend_schema,
+    OpenApiParameter,
+    OpenApiExample,
+)
+from rest_framework import viewsets, status, generics
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import (
@@ -23,7 +27,6 @@ from social_network.serializers import (
 
 
 class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all()
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     @staticmethod
@@ -49,6 +52,32 @@ class PostViewSet(viewsets.ModelViewSet):
         if reaction:
             queryset = queryset.filter(reactions=reaction)
         return queryset
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="tag",
+                type={"type": "list", "items": {"type": "number"}},
+                description="Filter posts by tag ids (coma separated)",
+                examples=[
+                    OpenApiExample("Empty tags", value=""),
+                    OpenApiExample("Single tags", value=1),
+                    OpenApiExample("Multiple tags", value="1,2"),
+                ],
+            ),
+            OpenApiParameter(
+                name="reaction",
+                type={"type": "number"},
+                description="Filter posts by user reaction id",
+                examples=[
+                    OpenApiExample("Empty reaction", value=""),
+                    OpenApiExample("Filled reaction", value=1),
+                ],
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     def get_serializer_class(self):
         if self.action in ["retrieve", "update"]:
@@ -101,6 +130,9 @@ class CommentViewSet(viewsets.ModelViewSet):
         return CommentSerializer
 
 
+@extend_schema(
+    description="Toggle a like reaction on a post.",
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def toggle_like(request: Request, pk: int) -> Response:
@@ -123,6 +155,9 @@ def toggle_like(request: Request, pk: int) -> Response:
         return Response({"status": "liked"}, status=status.HTTP_200_OK)
 
 
+@extend_schema(
+    description="Toggle a dislike reaction on a post.",
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def toggle_dislike(request: Request, pk: int) -> Response:
