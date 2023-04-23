@@ -35,13 +35,31 @@ class Comment(models.Model):
         return f"{self.text[:10]} by {self.owner.username}"
 
 
-class Like(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+class Reaction(models.Model):
+
+    REACTION_CHOICES = [
+        ("DIS", "dislike"),
+        ("LIKE", "like")
+    ]
+
+    reaction = models.CharField(
+        choices=REACTION_CHOICES,
+        max_length=10
+    )
+    post = models.ForeignKey(
+        Post, on_delete=models.CASCADE
+    )
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="likes",
+        on_delete=models.CASCADE
     )
+
+    class Meta:
+        default_related_name = "reactions"
+        unique_together = ["post", "owner"]
+
+    def __str__(self) -> str:
+        return self.reaction
 
 
 class Tag(models.Model):
