@@ -32,6 +32,15 @@ source venv/bin/activete # for linux or macOS
 venv\Scripts\activete # for Windows
 ```
 
+Create `.env` file inside your project root. Use `.env.semple` as template:
+```shell
+DJANGO_SECRET_KEY=DJANGO_SECRET_KEY
+DEBUG=DEBUG
+ALLOWED_HOSTS=ALLOWED_HOSTS
+```
+Change the part after `=` to your valid credentials, for example:
+`DJANGO_SECRET_KEY=your_django_secret_key`
+
 Perform the next commands to create migrations for your DB:
 ```shell
 python manage.py makemigration
